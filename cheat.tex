@@ -1,0 +1,607 @@
+%
+%  untitled
+%
+%  Created by Emanuel Ferm on 2011-04-25.
+%  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+%
+\documentclass[landscape,a2paper,8pt]{article}
+
+% Use utf-8 encoding for foreign characters
+\usepackage[utf8]{inputenc}
+
+% Setup for fullpage use
+\usepackage{fullpage}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[hmargin=1cm,vmargin=1cm]{geometry}
+\usepackage{mdwlist}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{nopageno}
+
+% Uncomment some of the following if you use the features
+%
+% Running Headers and footers
+%\usepackage{fancyhdr}
+
+% Multipart figures
+%\usepackage{subfigure}
+
+% More symbols
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{latexsym}
+
+% Surround parts of graphics with box
+\usepackage{boxedminipage}
+
+% Package for including code in the document
+\usepackage{listings}
+
+% If you want to generate a toc for each chapter (use with book)
+%\usepackage{minitoc}
+
+% This is now the recommended way for checking for PDFLaTeX:
+\usepackage{ifpdf}
+
+%\newif\ifpdf
+%\ifx\pdfoutput\undefined
+%\pdffalse % we are not running PDFLaTeX
+%\else
+%\pdfoutput=1 % we are running PDFLaTeX
+%\pdftrue
+%\fi
+
+\ifpdf
+\usepackage[pdftex]{graphicx}
+\else
+\usepackage{graphicx}
+\fi
+
+\DeclareMathOperator*{\argmax}{arg\,max\ }
+\DeclareMathOperator*{\argmin}{arg\,min\ }
+\DeclareMathOperator*{\sign}{sign}
+\newcommand{\E}{\mathop{\mathbb E}}
+
+\renewcommand{\c}[1]{
+}
+
+\renewcommand{\labelitemi}{{\tiny$\bullet$}}
+
+\newcommand{\ColWidth}{
+5cm
+}
+
+\newcommand{\RowHeight}{
+4cm
+}
+
+\newcommand{\KNNDescr}{
+The label of a new point $\hat{x}$ is classified with the most frequent label $\hat{t}$ of the $k$ nearest training instances.
+}
+
+\newcommand{\KNNModel}{
+\begin{align*}
+\hat{t} = \argmax_{\mathcal{C}} \sum_{i:x_{i} \in N_k(\boldsymbol{x},\hat{x})} \delta(t_i, \mathcal{C}) 
+\end{align*}
+\begin{itemize}
+	\item $N_k(\boldsymbol{x},\hat{x}) \leftarrow$ $k$ points in $\boldsymbol{x}$ closest to $\hat{x}$
+	\item Euclidean distance formula: $\sqrt{\sum_{i=1}^{D} (x_i - \hat{x}_i)^2}$
+	\item $\delta(a,b) \leftarrow$ 1 if $a = b$; 0 o/w
+\end{itemize}
+}
+
+\newcommand{\KNNObj}{
+No optimisation needed.
+}
+
+\newcommand{\KNNTrain}{
+No training, classification based on existing points.
+}
+
+\newcommand{\KNNReg}{
+$k$ acts as to regularise the classifier: as $k \rightarrow N$ the boundary becomes smoother.
+}
+
+\newcommand{\KNNCompl}{
+$\mathcal{O}(N)$ space complexity, since all training instances need to be kept in memory.
+}
+
+\newcommand{\KNNNonl}{
+Natively finds non-linear boundaries.
+}
+
+\newcommand{\KNNOnl}{
+Not applicable since no learning involved.
+}
+
+\newcommand{\NBDescr}{
+Learn $p(\mathcal{C}_k | x)$ by modelling $p(x | \mathcal{C}_k)$ and $p(\mathcal{C}_k)$, using Bayes' rule to infer the class conditional probability. Assumes each feature independent of all others, ergo `Naive.'
+}
+
+\newcommand{\NBModel}{
+{
+\begin{align*}
+	y(\boldsymbol{x}) 	&= \argmax_k p(\mathcal{C}_k | x) \\
+						&= \argmax_k p(x | \mathcal{C}_k) \times p(\mathcal{C}_k) \\
+						&= \argmax_k \prod_{i=1}^D p(x_i | \mathcal{C}_k) \times p(\mathcal{C}_k) \\
+						&= \argmax_k \sum_{i=1}^D \log p(x_i | \mathcal{C}_k) + \log p(\mathcal{C}_k)
+\end{align*}
+}}
+
+\newcommand{\NBObj}{
+No optimisation needed.
+}
+
+\newcommand{\NBTrain}{{
+\textbf{Multivariate likelihood}
+$
+	p(x | \mathcal{C}_k) = \sum_{i=1}^D \log p(x_i | \mathcal{C}_k)
+$
+\begin{align*}
+	p_{\text{MLE}}(x_i = v | \mathcal{C}_k) = \frac{\sum_{j=1}^N \delta(t_j = \mathcal{C}_k \wedge x_{ji} = v)}{\sum_{j=1}^N \delta(t_j = \mathcal{C}_k)}
+\end{align*}
+
+\noindent \textbf{Multinomial likelihood}
+$
+	p(x | \mathcal{C}_k) = \prod_{i=1}^D p(\text{word}_i | \mathcal{C}_k)^{x_i}
+$
+\begin{align*}
+	p_{\text{MLE}}(\text{word}_i = v | \mathcal{C}_k) = \frac{\sum_{j=1}^N \delta(t_j = \mathcal{C}_k) \times x_{ji}}{\sum_{j=1}^N \sum_{d=1}^D \delta(t_j = \mathcal{C}_k) \times x_{di}}
+\end{align*}
+
+\noindent \ldots where:
+\begin{itemize*}
+	\item $x_{ji}$ is the count of word $i$ in test example $j$;
+	\item $x_{di}$ is the count of feature $d$ in test example $j$.
+\end{itemize*}
+
+\noindent \textbf{Gaussian likelihood}
+$
+	p(x | \mathcal{C}_k) = \prod_{i=1}^D \mathcal{N}(v; \mu_{ik}, \sigma_{ik})
+$
+}}
+
+\newcommand{\NBReg}{{
+Use a Dirichlet prior on the parameters to obtain a MAP estimate.
+\newline
+
+\textbf{Multivariate likelihood}
+\begin{align*}
+	& p_{\text{MAP}}(x_i = v | \mathcal{C}_k) = \\
+	& \frac{(\beta_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k \wedge x_{ji} = v)}{|x_i|(\beta_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k)}
+\end{align*}
+
+\noindent \textbf{Multinomial likelihood}
+\begin{align*}
+	& p_{\text{MAP}}(\text{word}_i = v | \mathcal{C}_k) = \\
+	& \frac{(\alpha_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k) \times x_{ji}}{\sum_{j=1}^N \sum_{d=1}^D \left( \delta(t_j = \mathcal{C}_k) \times x_{di} \right) - D + \sum_{d=1}^D \alpha_d}
+\end{align*}
+}}
+
+\newcommand{\NBCompl}{{
+$\mathcal{O}(NM)$, each training instance must be visited and each of its features counted.
+}}
+
+\newcommand{\NBNonl}{{
+Can only learn linear boundaries for multivariate/multinomial attributes.
+\newline
+
+With Gaussian attributes, quadratic boundaries can be learned with uni-modal distributions.
+}}
+
+\newcommand{\NBOnl}{{
+To be added.
+}}
+
+\newcommand{\LLDescr}{{
+Estimate $p(\mathcal{C}_k | x)$ directly, by assuming a maximum entropy distribution and optimising an objective function over the conditional entropy distribution.
+}}
+
+\newcommand{\LLModel}{{
+\begin{align*}
+	y(x) 	&= \argmax_k p(\mathcal{C}_k | x) \\
+			&= \argmax_k \sum_m \lambda_m \phi_m(x, \mathcal{C}_k)
+%			&= \argmax_k \frac{1}{Z_{\lambda}(x)} e^{\sum_m \lambda_m \phi_m(x, \mathcal{C}_k)}
+\end{align*}
+
+\noindent \ldots where:
+\begin{align*}
+	&p(\mathcal{C}_k | x) = \frac{1}{Z_{\lambda}(x)} e^{\sum_m \lambda_m \phi_m(x, \mathcal{C}_k)} \\
+	&Z_{\lambda}(x) = \sum_k e^{\sum_m \lambda_m \phi_m(x, \mathcal{C}_k)}
+\end{align*}
+}}
+
+\newcommand{\LLObj}{{
+Minimise the negative log-likelihood:
+\begin{align*}
+	\mathcal{L}_{\text{MLE}}(\lambda, \mathcal{D}) 	&= \prod_{(x,t) \in \mathcal{D}} p(t | x) = - \sum_{(x,t) \in \mathcal{D}} \log p(t | x) \\
+													&= \sum_{(x,t) \in \mathcal{D}} \left( \log Z_{\lambda}(x) - \sum_m \lambda_m \phi_m(x, t) \right) \\
+													&= \sum_{(x,t) \in \mathcal{D}} \left( \log \sum_k e^{\sum_m \lambda_m \phi_m(x, \mathcal{C}_k)} - \sum_m \lambda_m \phi_m(x, t) \right)
+\end{align*}
+}}
+
+\newcommand{\LLTrain}{{
+Gradient descent (or gradient ascent if maximising objective):
+\begin{align*}
+	\lambda^{n+1} = \lambda^n - \eta \Delta \mathcal{L}
+\end{align*}
+
+\noindent \ldots where $\eta$ is the step parameter.
+
+\begin{align*}
+	\Delta \mathcal{L}_{\text{MLE}}(\lambda, \mathcal{D})	&= \sum_{(x,t) \in \mathcal{D}} \E[\phi(x,\cdot)] - \phi(x,t)
+\end{align*}
+
+\begin{align*}
+	\Delta \mathcal{L}_{\text{MAP}}(\lambda, \mathcal{D}, \sigma)	&= \frac{\lambda}{\sigma^2} + \sum_{(x,t) \in \mathcal{D}} \E[\phi(x,\cdot)] - \sum_{(x,t) \in \mathcal{D}} \phi(x,t)
+\end{align*}
+
+\noindent \ldots where $\sum_{(x,t) \in \mathcal{D}} \phi(x,t)$ are the empirical counts.
+\newline
+
+For each class $\mathcal{C}_k$:
+\begin{align*}
+	\sum_{(x,t) \in \mathcal{D}} \E[\phi(x,\cdot)] = \sum_{(x,t) \in \mathcal{D}} \phi(x,\cdot) p(\mathcal{C}_k | x)
+\end{align*}
+}}
+
+\newcommand{\LLReg}{{
+Penalise large values for the $\lambda$ parameters, by introducing a prior distribution over them (typically a Gaussian).
+\newline
+
+\textbf{Objective function}
+\begin{align*}
+	\mathcal{L}_{\text{MAP}}(\lambda, \mathcal{D}, \sigma) 	&= \argmin_{\lambda} \left( - \log p(\lambda) - \sum_{(x,t) \in \mathcal{D}} \log p(t | x) \right) \\
+													&= \argmin_{\lambda} \left( - \log e^{\frac{(0-\lambda)^2}{2\sigma^2}} - \sum_{(x,t) \in \mathcal{D}} \log p(t | x) \right) \\
+													&= \argmin_{\lambda} \left( \frac{\sum_m \lambda_m^2}{2\sigma^2} - \sum_{(x,t) \in \mathcal{D}} \log p(t | x) \right)
+\end{align*}
+}}
+
+\newcommand{\LLCompl}{{
+$\mathcal{O}(INMK)$, since each training instance must be visited and each combination of class and features must be calculated for the appropriate feature mapping.
+}}
+
+\newcommand{\LLNonl}{{
+Reformulate the class conditional distribution in terms of a kernel $K(x,x')$, and use a non-linear kernel (for example $K(x,x') = (1 + \boldsymbol{w}^T x)^2$). By the Representer Theorem:
+
+\begin{align*}
+	p(\mathcal{C}_k | x)	&= \frac{1}{Z_{\lambda}(x)} e^{\lambda^T \phi(x, \mathcal{C}_k)} \\
+							&= \frac{1}{Z_{\lambda}(x)} e^{\sum_{n=1}^N \sum_{i=1}^K \alpha_{nk} \phi(x_n, C_i)^T \phi(x, \mathcal{C}_k)} \\
+							&= \frac{1}{Z_{\lambda}(x)} e^{\sum_{n=1}^N \sum_{i=1}^K \alpha_{nk} K((x_n, C_i),(x,C_k))} \\
+							&= \frac{1}{Z_{\lambda}(x)} e^{\sum_{n=1}^N \alpha_{nk} K(x_n, x)}
+\end{align*}
+}}
+
+\newcommand{\LLOnl}{{
+Online Gradient Descent: Update the parameters using GD after seeing each training instance.
+}}
+
+\newcommand{\PDescr}{{
+Directly estimate the linear function $y(x)$ by iteratively updating the weight vector when incorrectly classifying a training instance.
+}}
+
+\newcommand{\PModel}{{
+Binary, linear classifier:
+\begin{align*}
+	y(x) = \sign(\boldsymbol{w}^T x)
+\end{align*}
+
+\noindent \ldots where:
+\begin{align*}
+	\sign(x) = \left\{
+		\begin{array}{l l}
+			+1 & \quad \text{if } x \geq 0 \\
+			-1 & \quad \text{if } x < 0 \\
+		\end{array} \right.
+\end{align*}
+
+\noindent Multiclass perceptron:
+\begin{align*}
+	y(x) = \argmax_{\mathcal{C}_k} \boldsymbol{w}^T \phi(x, \mathcal{C}_k)
+\end{align*}
+}}
+
+\newcommand{\PObj}{{
+Tries to minimise the Error function; the number of incorrectly classified input vectors:
+\begin{align*}
+	\argmin_{\boldsymbol{w}} E_P(\boldsymbol{w}) = \argmin_{\boldsymbol{w}} - \sum_{n \in \mathcal{M}} \boldsymbol{w}^T x_n t_n
+\end{align*}
+
+\noindent \ldots where $\mathcal{M}$ is the set of misclassified training vectors.
+
+%A boundary with 100\% accuracy is found when the perceptron criterion is satisfied: $\boldsymbol{w}^T x t > 0$.
+}}
+
+\newcommand{\PTrain}{{
+Iterate over each training example $x_n$, and update the weight vector if misclassification:
+\begin{align*}
+	\boldsymbol{w}^{i+1} 	&= \boldsymbol{w}^i + \eta \Delta E_P(\boldsymbol{w}) \\
+							&= \boldsymbol{w}^i + \eta x_n t_n
+\end{align*}
+
+\noindent \ldots where typically $\eta = 1$.
+\newline
+
+\noindent For the multiclass perceptron:
+\begin{align*}
+	\boldsymbol{w}^{i+1} = \boldsymbol{w}^i + \phi(x, t) - \phi(x, y(x))
+\end{align*}
+}}
+
+\newcommand{\PReg}{{
+The Voted Perceptron: run the perceptron $i$ times and store each iteration's weight vector. Then:
+\begin{align*}
+	y(x) = \sign \left( \sum_i c_i \times \sign(\boldsymbol{w}_i^T x) \right)
+\end{align*}
+\ldots where $c_i$ is the number of correctly classified training instances for $\boldsymbol{w}_i$.
+}}
+
+\newcommand{\PCompl}{{
+$\mathcal{O}(INML)$, since each combination of instance, class and features must be calculated (see log-linear).
+}}
+
+\newcommand{\PNonl}{{
+Use a kernel $K(x,x')$, and 1 weight per training instance:
+\begin{align*}
+	y(x) = \sign \left( \sum_{n=1}^N w_n t_n K(x, x_n) \right)
+\end{align*}
+
+\noindent \ldots and the update:
+\begin{align*}
+	w_n^{i+1} = w_n^i + 1
+\end{align*}
+}}
+
+\newcommand{\POnl}{{
+The perceptron is an online algorithm per default.
+}}
+
+\newcommand{\SVMDescr}{{
+A maximum margin classifier: finds the separating hyperplane with the maximum margin to its closest data points.
+}}
+
+\newcommand{\SVMModel}{{
+\begin{align*}
+	y(x) = \sum_{n=1}^N \lambda_n t_n x^T x_n + w_0
+\end{align*}
+}}
+
+\newcommand{\SVMObj}{{
+\textbf{Primal}
+\begin{align*}
+	\argmin_{\boldsymbol{w}, w_0} \frac{1}{2} ||\boldsymbol{w}||^2
+\end{align*}
+\begin{align*}
+	\text{s.t.} \quad	t_n (\boldsymbol{w}^T x_n + w_0) \geq 1 \quad \forall n
+\end{align*}
+
+\noindent \textbf{Dual}
+\begin{align*}
+	\tilde{\mathcal{L}}(\wedge) = \sum_{n=1}^N \lambda_n - \sum_{n=1}^N \sum_{m=1}^N \lambda_n \lambda_m t_n t_m x_n^T x_m
+\end{align*}
+\begin{align*}
+	\text{s.t.} \quad	& \lambda_n \geq 0, \quad \sum_{n=1}^N \lambda_n t_n = 0, \quad \forall n
+\end{align*}
+}}
+
+\newcommand{\SVMTrain}{{
+\begin{itemize}
+	\item Quadratic Programming (QP)
+	\item SMO, Sequential Minimal Optimisation (chunking). 
+\end{itemize}
+}}
+
+\newcommand{\SVMReg}{{
+The soft margin SVM: penalise a hyperplane by the number and distance of misclassified points.
+\newline
+
+\noindent \textbf{Primal}
+\begin{align*}
+	\argmin_{\boldsymbol{w}, w_0} \frac{1}{2} ||\boldsymbol{w}||^2 + C \sum_{n=1}^N \xi_n
+\end{align*}
+\begin{align*}
+	\text{s.t.} \quad	t_n (\boldsymbol{w}^T x_n + w_0) \geq 1 - \xi_n, \quad \xi_n > 0 \quad \forall n
+\end{align*}
+
+\noindent \textbf{Dual}
+\begin{align*}
+	\tilde{\mathcal{L}}(\wedge) = \sum_{n=1}^N \lambda_n - \sum_{n=1}^N \sum_{m=1}^N \lambda_n \lambda_m t_n t_m x_n^T x_m
+\end{align*}
+\begin{align*}
+	\text{s.t.} \quad 0 \leq \lambda_n \leq C, \quad \sum_{n=1}^N \lambda_n t_n = 0, \quad \forall n
+\end{align*}
+}}
+
+\newcommand{\SVMCompl}{{
+\begin{itemize}
+	\item QP: $\mathcal{O}(n^3)$;
+	\item SMO: much more efficient than QP, since computation based only on support vectors.
+\end{itemize}
+}}
+
+\newcommand{\SVMNonl}{{
+Use a non-linear kernel $K(x,x')$:
+
+\begin{align*}
+	y(x)	&= \sum_{n=1}^N \lambda_n t_n x^T x_n + w_0 \\
+			&= \sum_{n=1}^N \lambda_n t_n K(x, x_n) + w_0
+\end{align*}
+
+\begin{align*}
+	\tilde{\mathcal{L}}(\wedge) &= \sum_{n=1}^N \lambda_n - \sum_{n=1}^N \sum_{m=1}^N \lambda_n \lambda_m t_n t_m x_n^T x_m \\
+								&= \sum_{n=1}^N \lambda_n - \sum_{n=1}^N \sum_{m=1}^N \lambda_n \lambda_m t_n t_m K(x_n,x_m)
+\end{align*}
+}}
+
+\newcommand{\SVMOnl}{{
+Not discussed in course.
+}}
+
+\newcommand{\KMDescr}{{
+A hard-margin, geometric clustering algorithm, where each data point is assigned to its closest centroid.
+}}
+
+\newcommand{\KMModel}{{
+Hard assignments $r_{nk} \in \{0,1\}$ s.t. $\forall n \sum_k r_{nk} = 1$, i.e. each data point is assigned to one cluster $k$.
+\newline
+
+Geometric distance: The Euclidean distance, $l^2$ norm:
+\begin{align*}
+	|| x_n - \mu_k ||_2 = \sqrt{\sum_{i=1}^D (x_{ni} - \mu_{ki})^2}
+\end{align*}
+}}
+
+\newcommand{\KMObj}{{
+\begin{align*}
+	\argmin_{\boldsymbol{r},\mu} \sum_{n=1}^N \sum_{k=1}^K r_{nk} || x_n - \mu_k ||_2^2
+\end{align*}
+
+\noindent \ldots i.e. minimise the distance from each cluster centre to each of its points.
+}}
+
+\newcommand{\KMTrain}{{
+\textbf{E}xpectation:
+\begin{align*}
+	r_{nk} = \left\{
+		\begin{array}{l l}
+			1 & \quad \text{if } || x_n - \mu_k ||^2 \text{ minimal for } k \\
+			0 & \quad \text{o/w}
+		\end{array} \right.
+\end{align*}
+
+\textbf{M}aximisation:
+\begin{align*}
+	\mu_{\text{MLE}}^{(k)} = \frac{\sum_n r_{nk} x_n}{\sum_n r_{nk}}
+\end{align*}
+
+\noindent \ldots where $\mu^{(k)}$ is the centroid of cluster $k$.
+}}
+
+\newcommand{\KMReg}{{
+Only hard-margin assignment to clusters.
+}}
+
+\newcommand{\KMCompl}{{
+To be added.
+}}
+
+\newcommand{\KMNonl}{{
+Not applicable.
+}}
+
+\newcommand{\KMOnl}{{
+Not applicable.
+}}
+
+\newcommand{\MGDescr}{{
+A probabilistic clustering algorithm, where clusters are modelled as latent Guassians and each data point is assigned the probability of being drawn from a particular Gaussian.
+}}
+
+\newcommand{\MGModel}{{
+Assignments to clusters by specifying probabilities
+\begin{align*}
+	p(x^{(i)}, z^{(i)}) = p(x^{(i)} | z^{(i)})p(z^{(i)})
+\end{align*} 
+
+\noindent \ldots with $z^{(i)} \sim \text{ Multinomial}(\gamma)$, and $\gamma_{nk} \equiv p(k | x_n)$ s.t. $\sum_{j=1}^k \gamma_{nj} = 1$. I.e. want to maximise the probability of the observed data $\boldsymbol{x}$.
+}}
+
+\newcommand{\MGObj}{{
+\begin{align*}
+	\mathcal{L}(\boldsymbol{x}, \pi, \mu, \Sigma)	&= \log p(\boldsymbol{x} | \pi, \mu, \Sigma) \\
+													&= \sum_{n=1}^N \log \left( \sum_{k=1}^K \pi_k \mathcal{N}_k(x_n | \mu_k, \Sigma_k) \right)
+\end{align*}
+}}
+
+\newcommand{\MGTrain}{{
+\textbf{E}xpectation: For each $n,k$ set:
+\begin{align*}
+	\gamma_{nk}	&= p(z^{(i)} = k | x^{(i)}; \gamma, \mu, \Sigma) \quad (= p(k | x_n)) \\
+				&= \frac{p(x^{(i)} | z^{(i)} = k; \mu, \Sigma) p(z^{(i)} = k; \pi)}{\sum_{j=1}^K p(x^{(i)} | z^{(i)} = l; \mu, \Sigma) p(z^{(i)} = l; \pi)} \\
+				&= \frac{\pi_k \mathcal{N}(x_n | \mu_k, \Sigma_k)}{\sum_{j=1}^K \pi_j \mathcal{N}(x_n | \mu_j, \Sigma_j)}
+\end{align*}
+
+\textbf{M}aximisation:
+\begin{align*}
+	\pi_{k}	&= \frac{1}{N} \sum_{n=1}^N \gamma_{nk} \\
+	\Sigma_{k}	&= \frac{\sum_{n=1}^N \gamma_{nk} (x_n - \mu_k)(x_n - \mu_k)^T}{\sum_{n=1}^N \gamma_{nk}} \\
+	\mu_k 		&= \frac{\sum_{n=1}^N \gamma_{nk} x_n}{\sum_{n=1}^N \gamma_{nk}}
+\end{align*}
+}}
+
+\newcommand{\MGReg}{{
+The mixture of Gaussians assigns probabilities for each cluster to each data point, and as such is capable of capturing ambiguities in the data set.
+}}
+
+\newcommand{\MGCompl}{{
+To be added.
+}}
+
+\newcommand{\MGNonl}{{
+Not applicable.
+}}
+
+\newcommand{\MGOnl}{{
+Not applicable.
+}}
+
+\begin{document}
+
+\ifpdf
+\DeclareGraphicsExtensions{.pdf, .jpg, .tif}
+\else
+\DeclareGraphicsExtensions{.eps, .jpg}
+\fi
+% 
+% \maketitle
+% 
+% 
+% \begin{abstract}
+% \end{abstract}
+% 
+\begin{center}
+\section*{\sc \LARGE Cheat Sheet: Algorithms for Linear Classification and Unsupervised Learning \footnote{Created by \href{http://eferm.com}{Emanuel Ferm}, HT2011, for semi-procrastinational reasons while studying for a \href{http://www.comlab.ox.ac.uk/teaching/courses/2010-2011/machinelearning/}{Machine Learning} exam. Last updated \today.}}
+\end{center}
+
+\begin{table}[H]
+	\begin{center}
+	% \noalign{\smallskip}
+	\begin{footnotesize}
+	\begin{tabular}{@{\extracolsep{\fill}}
+		>{\raggedright}
+		m{2cm}						>{\raggedright}
+									m{5cm}					>{\raggedright}
+															m{\ColWidth{}}		>{\raggedright}
+																				m{8cm}				>{\raggedright}
+																									m{7cm}				>{\raggedright}
+																														m{7cm}					>{\raggedright}
+																																				m{\ColWidth{}}		>{\raggedright}
+																																									m{6cm}				m{\ColWidth{}}}
+		\sc{Algorithm}			&	\sc{Description}	&	\sc{Model}		&	\sc{Objective}	&	\sc{Training}	&	\sc{Regularisation}	&	\sc{Complexity}	&	\sc{Non-linear}	&	\sc{Online learning}	 \\
+		\hline
+		\hline \noalign{\smallskip}
+		\textbf{$k$-nearest 
+				neighbour}		&	\KNNDescr{}			&	\KNNModel{}		&	\KNNObj{}		&	\KNNTrain{}		&	\KNNReg{}			&	\KNNCompl{}		&	\KNNNonl{}		&	\KNNOnl{}	\\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		\textbf{Naive Bayes}	&	\NBDescr{}			&	\NBModel{}		&	\NBObj{}		&	\NBTrain{}		&	\NBReg{}			&	\NBCompl{}		&	\NBNonl{}		&	\NBOnl{}	\\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		\textbf{Log-linear}		&	\LLDescr{}			&	\LLModel{}		&	\LLObj{}		&	\LLTrain{}		&	\LLReg{}			&	\LLCompl{}		&	\LLNonl{}		&	\LLOnl{}	\\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		\textbf{Perceptron}		&	\PDescr{}			&	\PModel{}		&	\PObj{	}		&	\PTrain{}		&	\PReg{}				&	\PCompl{}		&	\PNonl{}		&	\POnl{}		\\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		\textbf{Support vector
+				machines}		&	\SVMDescr{}			&	\SVMModel{}		&	\SVMObj{}		&	\SVMTrain{}		&	\SVMReg{}			&	\SVMCompl{}		&	\SVMNonl{}		&	\SVMOnl{}	\\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		\textbf{$k$-means}		&	\KMDescr{}			&	\KMModel{}		&	\KMObj{}		&	\KMTrain{}		&	\KMReg{}			&	\KMCompl{}		&	\KMNonl{}		&	\KMOnl{}	\\
+		\noalign{\smallskip} \hline \noalign{\smallskip}
+		\textbf{Mixture of
+				Gaussians}		&	\MGDescr{}			&	\MGModel{}		&	\MGObj{}		&	\MGTrain{}		&	\MGReg{}			&	\MGCompl{}		&	\MGNonl{}		&	\MGOnl{}	\\
+	\end{tabular}
+	\end{footnotesize}
+	\end{center}
+\end{table}
+% \bibliographystyle{plain}
+% \bibliography{}
+\end{document}
