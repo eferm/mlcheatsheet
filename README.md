@@ -1,19 +1,14 @@
 A summary for common machine learning algorithms, provided in a handy format. 
 
-*Classifiers included are:*
+**Classifiers included are:**
 
-k-nearest neighbour
+*k-nearest neighbour
+*Naive Bayes
+*Log-linear
+*Perceptron
+*Support Vector Machines
 
-Naive Bayes
+**Clustering (EM) algorithms included are:**
 
-Log-linear
-
-Perceptron
-
-Support Vector Machines
-
-*Clustering (EM) algorithms included are:*
-
-k-means
-
-Mixture of Gaussians
+*k-means
+*Mixture of Gaussians
