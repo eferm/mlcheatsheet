@@ -139,17 +139,17 @@ No optimisation needed.
 $
 	p(x | \mathcal{C}_k) = \sum_{i=1}^D \log p(x_i | \mathcal{C}_k)
 $
-\begin{align*}
+\begin{multline*}
 	p_{\text{MLE}}(x_i = v | \mathcal{C}_k) = \frac{\sum_{j=1}^N \delta(t_j = \mathcal{C}_k \wedge x_{ji} = v)}{\sum_{j=1}^N \delta(t_j = \mathcal{C}_k)}
-\end{align*}
+\end{multline*}
 
-\noindent \textbf{Multinomial likelihood}
+\textbf{Multinomial likelihood}
 $
 	p(x | \mathcal{C}_k) = \prod_{i=1}^D p(\text{word}_i | \mathcal{C}_k)^{x_i}
 $
-\begin{align*}
+\begin{multline*}
 	p_{\text{MLE}}(\text{word}_i = v | \mathcal{C}_k) = \frac{\sum_{j=1}^N \delta(t_j = \mathcal{C}_k) \times x_{ji}}{\sum_{j=1}^N \sum_{d=1}^D \delta(t_j = \mathcal{C}_k) \times x_{di}}
-\end{align*}
+\end{multline*}
 
 \noindent \ldots where:
 \begin{itemize*}
@@ -168,16 +168,16 @@ Use a Dirichlet prior on the parameters to obtain a MAP estimate.
 \newline
 
 \textbf{Multivariate likelihood}
-\begin{align*}
-	& p_{\text{MAP}}(x_i = v | \mathcal{C}_k) = \\
-	& \frac{(\beta_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k \wedge x_{ji} = v)}{|x_i|(\beta_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k)}
-\end{align*}
+\begin{multline*}
+	p_{\text{MAP}}(x_i = v | \mathcal{C}_k) = \\
+	\frac{(\beta_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k \wedge x_{ji} = v)}{|x_i|(\beta_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k)}
+\end{multline*}
 
 \noindent \textbf{Multinomial likelihood}
-\begin{align*}
-	& p_{\text{MAP}}(\text{word}_i = v | \mathcal{C}_k) = \\
-	& \frac{(\alpha_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k) \times x_{ji}}{\sum_{j=1}^N \sum_{d=1}^D \left( \delta(t_j = \mathcal{C}_k) \times x_{di} \right) - D + \sum_{d=1}^D \alpha_d}
-\end{align*}
+\begin{multline*}
+	p_{\text{MAP}}(\text{word}_i = v | \mathcal{C}_k) = \\
+	\frac{(\alpha_i - 1) + \sum_{j=1}^N \delta(t_j = \mathcal{C}_k) \times x_{ji}}{\sum_{j=1}^N \sum_{d=1}^D \left( \delta(t_j = \mathcal{C}_k) \times x_{di} \right) - D + \sum_{d=1}^D \alpha_d}
+\end{multline*}
 }}
 
 \newcommand{\NBCompl}{{
@@ -215,11 +215,11 @@ Estimate $p(\mathcal{C}_k | x)$ directly, by assuming a maximum entropy distribu
 
 \newcommand{\LLObj}{{
 Minimise the negative log-likelihood:
-\begin{align*}
-	\mathcal{L}_{\text{MLE}}(\lambda, \mathcal{D}) 	&= \prod_{(x,t) \in \mathcal{D}} p(t | x) = - \sum_{(x,t) \in \mathcal{D}} \log p(t | x) \\
-													&= \sum_{(x,t) \in \mathcal{D}} \left( \log Z_{\lambda}(x) - \sum_m \lambda_m \phi_m(x, t) \right) \\
-													&= \sum_{(x,t) \in \mathcal{D}} \left( \log \sum_k e^{\sum_m \lambda_m \phi_m(x, \mathcal{C}_k)} - \sum_m \lambda_m \phi_m(x, t) \right)
-\end{align*}
+\begin{flalign*}
+	&\mathcal{L}_{\text{MLE}}(\lambda, \mathcal{D}) = \prod_{(x,t) \in \mathcal{D}} p(t | x) = - \sum_{(x,t) \in \mathcal{D}} \log p(t | x) \\
+	& \qquad												= \sum_{(x,t) \in \mathcal{D}} \left( \log Z_{\lambda}(x) - \sum_m \lambda_m \phi_m(x, t) \right) \\
+	& \qquad												= \sum_{(x,t) \in \mathcal{D}} \left( \log \sum_k e^{\sum_m \lambda_m \phi_m(x, \mathcal{C}_k)} - \sum_m \lambda_m \phi_m(x, t) \right)
+\end{flalign*}
 }}
 
 \newcommand{\LLTrain}{{
@@ -231,11 +231,8 @@ Gradient descent (or gradient ascent if maximising objective):
 \noindent \ldots where $\eta$ is the step parameter.
 
 \begin{align*}
-	\Delta \mathcal{L}_{\text{MLE}}(\lambda, \mathcal{D})	&= \sum_{(x,t) \in \mathcal{D}} \E[\phi(x,\cdot)] - \phi(x,t)
-\end{align*}
-
-\begin{align*}
-	\Delta \mathcal{L}_{\text{MAP}}(\lambda, \mathcal{D}, \sigma)	&= \frac{\lambda}{\sigma^2} + \sum_{(x,t) \in \mathcal{D}} \E[\phi(x,\cdot)] - \sum_{(x,t) \in \mathcal{D}} \phi(x,t)
+	&\Delta \mathcal{L}_{\text{MLE}}(\lambda, \mathcal{D}) = \sum_{(x,t) \in \mathcal{D}} \E[\phi(x,\cdot)] - \phi(x,t) \\
+	&\Delta \mathcal{L}_{\text{MAP}}(\lambda, \mathcal{D}, \sigma) = \frac{\lambda}{\sigma^2} + \sum_{(x,t) \in \mathcal{D}} \E[\phi(x,\cdot)] - \sum_{(x,t) \in \mathcal{D}} \phi(x,t)
 \end{align*}
 
 \noindent \ldots where $\sum_{(x,t) \in \mathcal{D}} \phi(x,t)$ are the empirical counts.
@@ -275,6 +272,7 @@ Reformulate the class conditional distribution in terms of a kernel $K(x,x')$, a
 }}
 
 \newcommand{\LLOnl}{{
+\raggedright
 Online Gradient Descent: Update the parameters using GD after seeing each training instance.
 }}
 
@@ -355,6 +353,7 @@ Use a kernel $K(x,x')$, and 1 weight per training instance:
 }}
 
 \newcommand{\POnl}{{
+\raggedright
 The perceptron is an online algorithm per default.
 }}
 
@@ -436,7 +435,12 @@ Use a non-linear kernel $K(x,x')$:
 }}
 
 \newcommand{\SVMOnl}{{
-Online SVM is described in \emph{The Huller: A Simple and Efficient Online SVM}, Bordes \& Bottou (2005).
+\raggedright
+Online SVM. See, for example:
+\begin{itemize}
+	\item \emph{The Huller: A Simple and Efficient Online SVM}, Bordes \& Bottou (2005)
+	\item \emph{Pegasos: Primal Estimated sub-Gradient Solver for SVM}, Shalev-Shwartz et al. (2007)
+\end{itemize}
 }}
 
 \newcommand{\KMDescr}{{
@@ -488,11 +492,16 @@ To be added.
 }}
 
 \newcommand{\KMNonl}{{
-Not applicable.
+For non-linearly separable data, use kernel k-means as suggested in:
+\newline
+
+\emph{Kernel k-means, Spectral Clustering and Normalized Cuts}, Dhillon et al. (2004).
+
 }}
 
 \newcommand{\KMOnl}{{
-To be added.
+\raggedright
+Sequential $k$-means: update the centroids after processing one point at a time.
 }}
 
 \newcommand{\MGDescr}{{
@@ -544,7 +553,11 @@ Not applicable.
 }}
 
 \newcommand{\MGOnl}{{
-Online estimation of Gaussian Mixture Models is described in \emph{Highly Efficient Incremental Estimation of Gaussian Mixture Models for Online Data Stream Clustering}, Song \& Wang (2005).
+\raggedright
+Online estimation of Gaussian Mixture Models is described in:
+\newline
+
+\emph{Highly Efficient Incremental Estimation of Gaussian Mixture Models for Online Data Stream Clustering}, Song \& Wang (2005).
 }}
 
 \begin{document}
@@ -574,12 +587,12 @@ Online estimation of Gaussian Mixture Models is described in \emph{Highly Effici
 		m{2cm}						>{\raggedright}
 									m{5cm}					>{\raggedright}
 															m{\ColWidth{}}		>{\raggedright}
-																				m{8cm}				>{\raggedright}
-																									m{7cm}				>{\raggedright}
+																				m{7cm}				>{\raggedright}
+																									m{8cm}				>{\raggedright}
 																														m{7cm}					>{\raggedright}
 																																				m{\ColWidth{}}		>{\raggedright}
 																																									m{6cm}				m{\ColWidth{}}}
-		\sc{Algorithm}			&	\sc{Description}	&	\sc{Model}		&	\sc{Objective}	&	\sc{Training}	&	\sc{Regularisation}	&	\sc{Complexity}	&	\sc{Non-linear}	&	\sc{Online learning}	 \\
+		\sc{Algorithm}			&	\sc{Description}	&	\sc{Model}		&	\sc{Objective}	&	\sc{Training}	&	\sc{Regularisation}	&	\sc{Complexity}	&	\sc{Non-linear}	&	\sc{Online learning}	\\
 		\hline
 		\hline \noalign{\smallskip}
 		\textbf{$k$-nearest 
